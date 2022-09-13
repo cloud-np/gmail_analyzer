@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class Mail:
+class User:
+    _id: int
     email: str
-    name: str
-    comments: str
+    fname: str
+    lname: str

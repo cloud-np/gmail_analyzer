@@ -1,5 +1,7 @@
 import os
 import pickle
+from dotenv import load_dotenv
+
 # Gmail API utils
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -7,8 +9,8 @@ from google.auth.transport.requests import Request
 # for decoding messages in base64
 from base64 import urlsafe_b64decode
 
-from typing import Optional, List, Dict
-from models.email import Email
+from typing import Optional, List, Dict, Any
+from models.message import Message
 from utils import model_from_dict
 
 CLIENT_FILE = 'client.json'
@@ -16,35 +18,37 @@ API_NAME = 'gmail'
 API_VERSION = 'v1'
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://mail.google.com/']
-# our_email = 'cloudanarchy@gmail.com'
 
 
 class GMailScraper:
 
     def __init__(self) -> None:
         # sourcery skip: raise-specific-error
-        # load_dotenv()
+        load_dotenv()
+        self.query: str
         try:
-            self.query: str = os.getenv('QUERY')
+            self.query: str = str(os.getenv('QUERY'))
         except:
             raise Exception("Could not parse correctly enviroment variables.")
 
         # Authenticate and create service
         self.service = GMailScraper.gmail_authenticate()
         # get emails that match the query you specify
-        self.messages = self.search_messages(query=self.query)
-        # results = self.search_messages("from:maria_louiza@hotmail.com")
+        self.messages: list = self.search_messages()
         # results = search_messages(service, "Python Code")
-        print(f"Found {len(self.messages)} messages.")
         # for each email matched, read it (output plain/text to console & save HTML and attachments)
     
-    def crawl_emails(self, n: Optional[int] = None) -> Email:
+    def crawl_emails(self, n: Optional[int] = None) -> Message:
         if n is None:
             n = len(self.messages)
         for msg in self.messages[:n]:
             yield self.read_message(msg)
 
-    def search_messages(self, query: str):
+    def search_messages(self, query: Optional[str] = None):
+        if query is None:
+            if self.query is None:
+                raise Exception('No query given or found')
+            query = self.query
         result = self.service.users().messages().list(userId='me', q=query).execute()
         messages = []
         if 'messages' in result:
@@ -54,6 +58,7 @@ class GMailScraper:
             result = self.service.users().messages().list(userId='me', q=query, pageToken=page_token).execute()
             if 'messages' in result:
                 messages.extend(result['messages'])
+        print(f"Found {len(messages)} messages.")
         return messages
 
     @staticmethod
@@ -74,11 +79,11 @@ class GMailScraper:
             # save the credentials for the next run
             with open("token.pickle", "wb") as token:
                 pickle.dump(creds, token)
-        return build('gmail', 'v1', credentials=creds)
+        return build(API_NAME, API_VERSION, credentials=creds)
 
     # Got code from
     # https://www.thepythoncode.com/article/use-gmail-api-in-python#Enabling_Gmail_API
-    def read_message(self, message) -> Email:
+    def read_message(self, message) -> Message:
         """
         This function takes Gmail API `service` and the given `message_id` and does the following:
             - Downloads the content of the email
@@ -92,41 +97,36 @@ class GMailScraper:
         payload = msg['payload']
         headers = payload.get("headers")
         parts = payload.get("parts")
-        email_dict: Dict[str, str, str, str, str] = {'frm': '', 'to': '', 'subject': '', 'datetime': '', 'content': ''}
+        msg_dict: Dict[str, str, str, str, str, str] = {'msg_id': '', 'frm': '', '_to': '', 'subject': '', '_datetime': '', 'content': ''}
         if headers:
             # this section prints email basic info & creates a folder for the email
             for header in headers:
                 name = header.get("name")
                 value = header.get("value")
-                if name.lower() == 'from':
-                    # we print the From address
-                    print("From:", value)
-                    email_dict['frm'] = value
-                if name.lower() == "to":
-                    # we print the To address
-                    print("To:", value)
-                    email_dict['to'] = value
-                if name.lower() == "subject":
-                    print("Subject:", value)
-                    email_dict['subject'] = value
-                if name.lower() == "date":
-                    # we print the date when the message was sent
-                    print("Date:", value)
-                    email_dict['datetime'] = value
-
-        # if not has_subject and not os.path.isdir(folder_name):
-        #     # if the email does not have a subject, then make a folder with "email" name
-        #     # since folders are created based on subjects
-        #     os.mkdir(folder_name)
+                match name.lower():
+                    case 'from':
+                        msg_dict['frm'] = value
+                    case 'to':
+                        msg_dict['_to'] = value
+                    case 'subject':
+                        msg_dict['subject'] = value
+                    case 'date':
+                        msg_dict['_datetime'] = value
+        
+        if msg_dict['msg_id'] == '':
+            msg_dict['msg_id'] = message.get('id')
+        
+        print(msg_dict)
+        # Get the message content/body
         if parts is not None:
             content_list: List[str] = []
             self.parse_parts(parts, message, content_list)
             content = ''.join(content_list)
         else:
             content = parse_msg(msg)
-        email_dict['content'] = content
-        print("=" * 50)
-        return model_from_dict(Email, email_dict)
+        msg_dict['content'] = content
+        # print("=" * 50)
+        return model_from_dict(Message, msg_dict)
 
     def parse_parts(self, parts, message, content_list: List[str]):
         """

@@ -1,6 +1,7 @@
 */__pycache__
 __pycache__/
 venv/
+wsl_venv/
 .vscode/
 *.pickle
 .env
