@@ -5,4 +5,5 @@ wsl_venv/
 .vscode/
 *.pickle
 .env
+*.db
 client_secret.json

@@ -8,7 +8,6 @@ class Extractor:
         if message.subject == 'Message from your website "[your-subject]"':
             Extractor.email_from_our_website(message)
         print(message)
-        print()
     
     @staticmethod
     def email_from_our_website(message: Message):

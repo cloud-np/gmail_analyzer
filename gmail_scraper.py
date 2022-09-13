@@ -38,7 +38,7 @@ class GMailScraper:
         # results = search_messages(service, "Python Code")
         # for each email matched, read it (output plain/text to console & save HTML and attachments)
     
-    def crawl_emails(self, n: Optional[int] = None) -> Message:
+    def crawl_messages(self, n: Optional[int] = None) -> Message:
         if n is None:
             n = len(self.messages)
         for msg in self.messages[:n]:

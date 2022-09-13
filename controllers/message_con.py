@@ -22,12 +22,12 @@ class MessageController(BasicController):
             print(e)
             return False
 
-    def get_message(self, msg_id):
+    def get_message(self, msg_id: str):
         try:
-            return pd.read_sql_query(f"SELECT * FROM messages WHERE msg_id = {msg_id}", self.conn)
+            return pd.read_sql_query(f"SELECT * FROM messages WHERE msg_id = '{msg_id}'", self.conn)
         except Exception as e:
             print(e)
-            return None
+            raise Exception('Failed to run sql query.') 
 
     # def clear_bad_values(self):
     #     self.exec_query(query="DELETE FROM matches WHERE prc_one <= 0 OR prc_x <= 0 OR prc_two <= 0 OR prc_one >= 100 OR prc_x >= 100 OR prc_two >= 100 OR one <= 0.99 OR x <= 0.99 OR two <= 0.99")
@@ -49,7 +49,7 @@ class MessageController(BasicController):
     def create_message_table(self):
         self.exec_query("""
             CREATE TABLE messages(
-                msg_id integer NOT NULL PRIMARY KEY,
+                msg_id text NOT NULL PRIMARY KEY,
                 frm text NOT NULL,
                 _to text NOT NULL,
                 subject text NOT NULL,
