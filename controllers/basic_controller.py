@@ -1,18 +1,24 @@
 import sqlite3
 import numpy as np
 import pandas as pd
+import json
+import os
+from dotenv import load_dotenv
 
+EXAMPLE_DB = "gmails_test.db"
+DB_NAME = "gmails.db"
 
 class BasicController:
     def __init__(self):
         self.c: sqlite3.Cursor
         self.conn: sqlite3.Connection
-        self.c, self.conn = BasicController.connect_db()
+        load_dotenv()
+        self.db_name: str = EXAMPLE_DB if bool(os.getenv('DEBUG')) else DB_NAME
+        self.c, self.conn = self.connect_db()
 
-    @staticmethod
-    def connect_db():
+    def connect_db(self):
         try:
-            conn = sqlite3.connect('gmails.db')
+            conn = sqlite3.connect(self.db_name)
             c = conn.cursor()
             return c, conn
         except Exception as e:

@@ -1,4 +1,5 @@
 import os
+import string
 from dataclasses import fields
 
 
@@ -21,6 +22,8 @@ def get_size_format(b, factor=1024, suffix="B"):
         b /= factor
     return f"{b:.2f}Y{suffix}"
 
+def remove_spaces(txt):
+    return "".join(txt.split())
 
 def clean(text):
     # clean text for creating a folder

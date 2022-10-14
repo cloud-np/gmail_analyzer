@@ -75,7 +75,9 @@ class GMailScraper:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
-                creds = flow.run_local_server(port=0)
+                # Maybe because of Brave browser or wsl2 openning the browser function hungs.
+                # So simple prompt to show the url in the terminal window and click it from there.
+                creds = flow.run_local_server(port=0, open_browser=False)
             # save the credentials for the next run
             with open("token.pickle", "wb") as token:
                 pickle.dump(creds, token)
@@ -83,7 +85,7 @@ class GMailScraper:
 
     # Got code from
     # https://www.thepythoncode.com/article/use-gmail-api-in-python#Enabling_Gmail_API
-    def read_message(self, message) -> Message:
+    def read_message(self, message) -> dict:
         """
         This function takes Gmail API `service` and the given `message_id` and does the following:
             - Downloads the content of the email
@@ -97,7 +99,7 @@ class GMailScraper:
         payload = msg['payload']
         headers = payload.get("headers")
         parts = payload.get("parts")
-        msg_dict: Dict[str, str, str, str, str, str] = {'msg_id': '', 'frm': '', '_to': '', 'subject': '', '_datetime': '', 'content': ''}
+        msg_dict: Dict[str, str, str, str, str, str] = {'_id': '', 'frm': '', '_to': '', 'subject': '', '_datetime': '', 'content': ''}
         if headers:
             # this section prints email basic info & creates a folder for the email
             for header in headers:
@@ -113,10 +115,9 @@ class GMailScraper:
                     case 'date':
                         msg_dict['_datetime'] = value
         
-        if msg_dict['msg_id'] == '':
-            msg_dict['msg_id'] = message.get('id')
+        if msg_dict['_id'] == '':
+            msg_dict['_id'] = message.get('id')
         
-        print(msg_dict)
         # Get the message content/body
         if parts is not None:
             content_list: List[str] = []
@@ -125,8 +126,9 @@ class GMailScraper:
         else:
             content = parse_msg(msg)
         msg_dict['content'] = content
-        # print("=" * 50)
-        return model_from_dict(Message, msg_dict)
+        print(msg_dict)
+        print("=" * 50)
+        return msg_dict
 
     def parse_parts(self, parts, message, content_list: List[str]):
         """
@@ -141,7 +143,7 @@ class GMailScraper:
             if part.get("parts"):
                 # recursively call this function when we see 
                 # that a part has parts inside
-                self.parse_parts(part.get("parts"), message)
+                self.parse_parts(part.get("parts"), message, content_list)
             if mimeType == "text/plain" and data:
                 text = urlsafe_b64decode(data).decode()
                 content_list.append(text)

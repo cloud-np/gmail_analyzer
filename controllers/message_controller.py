@@ -11,20 +11,24 @@ class MessageController(BasicController):
         self.conn: sqlite3.Connection
         super().__init__()
 
-    def insert_message(self, message: Message):
+    def insert_message(self, message: Message) -> None:
         try:
-            if self.get_message(message.msg_id).empty:
-                self.exec_query(f"INSERT INTO messages VALUES ({message})")
-                print(f'Added match {message.message}')
+            existing_message: pd.DataFrame = self.get_message(message._id)
+            if existing_message.empty:
+                if self.exec_query(f"""
+                                INSERT INTO messages(_id, frm, _to, subject, _datetime, content, user_id) 
+                                VALUES ('{message._id}', '{message.frm}', '{message._to}', '{message.subject}', '{message._datetime}', '{message.content}', '{message.user_id}')
+                                """):
+                    print(f'Added message {message._id}')
             else:
-                print(f'Match {message.msg_id} already exists')
+                print(f'Message {message._id} already exists')
         except Exception as e:
             print(e)
-            return False
+        return None
 
-    def get_message(self, msg_id):
+    def get_message(self, msg_id: str) -> Message | None:
         try:
-            return pd.read_sql_query(f"SELECT * FROM messages WHERE msg_id = {msg_id}", self.conn)
+            return pd.read_sql_query(f"SELECT * FROM messages WHERE _id = '{msg_id}'", self.conn)
         except Exception as e:
             print(e)
             return None
@@ -46,14 +50,16 @@ class MessageController(BasicController):
             print(e)
             return None
 
-    def create_message_table(self):
+    def create_messages_table(self):
         self.exec_query("""
             CREATE TABLE messages(
-                msg_id integer NOT NULL PRIMARY KEY,
+                _id text NOT NULL UNIQUE, 
                 frm text NOT NULL,
                 _to text NOT NULL,
                 subject text NOT NULL,
                 _datetime text NOT NULL,
-                content text NOT NULL
+                content text NOT NULL,
+                user_id integer NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(_id) 
             )
             """)

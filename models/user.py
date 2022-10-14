@@ -4,5 +4,5 @@ from dataclasses import dataclass
 class User:
     _id: int
     email: str
-    fname: str
-    lname: str
+    name: str
+    phone: str
