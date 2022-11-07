@@ -5,7 +5,7 @@ from models import User, message
 def main():
     gms = GMailScraper()
     ext = Extractor()
-    for e in gms.crawl_emails(3):
+    for e in gms.crawl_emails(6):
         user, message, proposed_ceremony = ext.get_email_info(e)
         print(user)
         print(message)

@@ -12,7 +12,7 @@ class NefSiteParser(Parser):
         name = ' '.join(self.received_email['content'].split('Το ονοματεπώνυμο σας::')[1].split('Ενδια')[0].split())
         user_mail = remove_spaces(self.received_email['content'].split('Το email σας::')[1].split('Το μήνυμ')[0])
         phone = remove_spaces(self.received_email['content'].split('Το email σας::')[0].split('Τηλέφωνο επικοινωνίας::')[1])
-        return {'name': name, 'user_mail': user_mail, 'phone': phone}
+        return {'name': name, 'email': user_mail, 'phone': phone}
 
     # @ParsingChecker.checker
     # def parse_ceremony(self) -> dict:
