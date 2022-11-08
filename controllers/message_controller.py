@@ -1,7 +1,9 @@
 import sqlite3
+
+import pandas as pd
+
 from controllers import BasicController
 from models import Message
-import pandas as pd
 
 
 class MessageController(BasicController):

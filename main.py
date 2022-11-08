@@ -1,11 +1,12 @@
-from gmail_scraper import GMailScraper
 from extract_info import Extractor
+from gmail_scraper import GMailScraper
 from models import User, message
+
 
 def main():
     gms = GMailScraper()
     ext = Extractor()
-    for e in gms.crawl_emails(6):
+    for e in gms.crawl_emails(10_000):
         user, message, proposed_ceremony = ext.get_email_info(e)
         print(user)
         print(message)

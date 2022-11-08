@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+
 class Parser:
     def __init__(self, received_email: dict) -> None:
         self.received_email: dict = received_email

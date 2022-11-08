@@ -1,15 +1,15 @@
 import os
 import pickle
-from dotenv import load_dotenv
-
-# Gmail API utils
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 # for decoding messages in base64
 from base64 import urlsafe_b64decode
+from typing import Any, Dict, List, Optional
 
-from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+# Gmail API utils
+from googleapiclient.discovery import build
+
 from models.message import Message
 from utils import model_from_dict
 

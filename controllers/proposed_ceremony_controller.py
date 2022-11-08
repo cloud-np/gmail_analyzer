@@ -1,7 +1,9 @@
 import sqlite3
+
+import pandas as pd
+
 from controllers import BasicController
 from models import ProposedCeremony
-import pandas as pd
 
 
 class ProposedCeremonyController(BasicController):
