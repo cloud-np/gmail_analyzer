@@ -83,7 +83,7 @@ class ProposedCeremonyController(BasicController):
                 ceremony_type text NOT NULL,
                 comments text NOT NULL,
                 user_id integer NOT NULL,
-                msg_id integer NOT NULL UNIQUE,
+                msg_id text NOT NULL UNIQUE,
                 FOREIGN KEY (user_id) REFERENCES users(_id),
                 FOREIGN KEY (msg_id) REFERENCES messages(_id)
             )

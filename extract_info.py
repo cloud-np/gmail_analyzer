@@ -56,6 +56,11 @@ class Extractor:
         return user, message, proposed_ceremony
     
     def parse_content(self, received_email: dict) -> None | tuple[dict, dict, dict]:
+
+        # Remove special character that breaks SQL queries.
+        received_email['content'] = received_email['content'].replace("'", '')
+
+        # Pick the correct parser.
         if received_email['frm'].__contains__(os.getenv('OUR_WEBSITE')):
             self.parser = OurSiteParser(received_email)
         elif received_email['subject'].__contains__(os.getenv('MELAN_WEBSITE')):
@@ -70,6 +75,8 @@ class Extractor:
         user: User = self.uc.create_user(user_dict)
 
         ceremony_dict: dict = self.parser.parse_ceremony()
+        ceremony_dict['msg_id'] = received_email['_id']
+        ceremony_dict['user_id'] = user._id 
         proposed_ceremony: ProposedCeremony = self.cc.create_proposed_ceremony(ceremony_dict)
 
         message: Message = model_from_dict(Message, {**received_email, 'user_id': user._id})

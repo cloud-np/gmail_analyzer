@@ -8,9 +8,10 @@ def main():
     ext = Extractor()
     for e in gms.crawl_emails(10_000):
         user, message, proposed_ceremony = ext.get_email_info(e)
-        print(user)
-        print(message)
-        print(proposed_ceremony)
+        # print(message)
+        print('=' * 100)
+        # print(user)
+        # print(proposed_ceremony)
         # user, msg = ext.get_email_info(e)
     # print(msc.get_all_messages())
 

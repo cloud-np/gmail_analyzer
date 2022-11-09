@@ -11,7 +11,7 @@ class MelanSiteParser(Parser):
     
     @ParsingChecker.checker
     def parse_user(self) -> dict:
-        name = ' '.join(self.received_email['content'].split('Το ονοματεπώνυμο σας: *:')[1].split('Ενδια')[0].split())
+        name = ' '.join(self.received_email['content'].split('Το ονοματεπώνυμο σας: *:')[1].split('Το email σας: *:')[0].split())
         user_mail = remove_spaces(self.received_email['content'].split('Το email σας: *:')[1].split('Ενδια')[0])
         phone = remove_spaces(self.received_email['content'].split('Το email σας: *:')[1].split('Τηλέφωνο επικοινωνίας: *:')[1].split('Το μήνυμά')[0])
         return {'name': name, 'email': user_mail, 'phone': phone}

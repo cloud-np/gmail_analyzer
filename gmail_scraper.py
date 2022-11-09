@@ -126,8 +126,8 @@ class GMailScraper:
         else:
             content = parse_msg(msg)
         msg_dict['content'] = content
-        print(msg_dict)
-        print("=" * 50)
+        # print(msg_dict)
+        # print("=" * 50)
         return msg_dict
 
     def parse_parts(self, parts, message, content_list: List[str]):
